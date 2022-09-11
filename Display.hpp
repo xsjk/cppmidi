@@ -100,7 +100,7 @@ class DISPLAY : Loop {
   void update() {
     if(!displaying.empty()) {
       std::lock_guard<std::mutex> lk(mtx);
-      for (const auto& [c, p] : displaying)
+      for (const auto [c, p] : displaying)
         if (is_alive())
           emplace_block(c, p);
         else
@@ -114,9 +114,9 @@ public:
     Console::set_color();
     Console::set_pos(Display::origin);
     for (int i=1; i<=6; ++i) {
-      for (const auto & s: {" C", "#C", " D", "bE", " E", " F", "F#", " G", "#G"})
+      for (auto s: {" C", "#C", " D", "bE", " E", " F", "F#", " G", "#G"})
         std::cout << s << i << std::endl;
-      for (const auto & s: {" A", "bB", " B"})
+      for (auto s: {" A", "bB", " B"})
         std::cout << s << i+1 << std::endl;
       std::cout << std::endl;
     }
