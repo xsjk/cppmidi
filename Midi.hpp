@@ -1,6 +1,6 @@
 #ifndef __MIDI_HPP
 #define __MIDI_HPP
-#pragma comment(lib,"winmm.lib")
+// #pragma comment(lib,"winmm.lib")
 #include <Windows.h>
 #include <stdexcept>
 
@@ -53,8 +53,8 @@ public:
   MIDI& operator<<(Sound s) { 
     return begin_note(s.channel, s.pitch, s.volume), *this;
   }
-  MIDI& operator>> (Sound n) { 
-    return end_note(n.channel, n.pitch), *this;
+  MIDI& operator>> (Sound s) { 
+    return end_note(s.channel, s.pitch), *this;
   }
 };
 

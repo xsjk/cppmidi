@@ -13,8 +13,8 @@ class KEYBOARD {
   static std::mutex mtx;
   static std::list<KEYBOARD*> keyboard_list;
 protected:
-  virtual void on_press(int c) {}
-  virtual void on_release(int c) {}
+  virtual void on_press(int) {}
+  virtual void on_release(int) {}
   static void update() {
     for (int c = 0; c < 1 << 8; ++c) {
       if (GetAsyncKeyState(c) < 0) {

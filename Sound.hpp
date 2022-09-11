@@ -9,6 +9,7 @@ class Pitch {
   BYTE pitch;
   Pitch(char c, int n, char f=' ') : Pitch{ (BYTE)(21 + 2*(c-'A') - (c>'E' ? 2 : c>'B' ? 1 : 0) + 12 * n + (f == '#' ? 1 : f == 'b' ? -1 : 0)) } {}
 public:
+  Pitch() : pitch{0} {}
   Pitch(int pitch) : pitch{ (BYTE)pitch } {}
   Pitch(const char* s) : Pitch{ std::string(s) } {}
   Pitch(std::string s) : Pitch{ (s.length() == 3 ? s[1] : s[0]),(s.length() == 3 ? s[2] : s[1]) - '0',(s.length() == 3 ? s[0] : ' ')} {}
@@ -26,7 +27,12 @@ public:
   operator BYTE() const { return volume; }
 };
 
-using Channel = BYTE;
+class Channel {
+  BYTE channel;
+public:
+  Channel(int c) : channel{ BYTE(c) } {}
+  operator BYTE() const { return channel; }
+};
 
 class Instrument {
   BYTE instrument;
@@ -38,12 +44,13 @@ public:
 };
 
 struct Sound {
-  Pitch pitch = 0;
+  Pitch pitch;
   Volume volume = "f";
   Channel channel = 0;
   Instrument instrument = 0;
-  // bool operator<(const Note& other) const { return pitch < other.pitch; }
 };
+
+
 
 
 

@@ -11,32 +11,25 @@ public:
   StreamBase& operator>>(const T&) { return *this; }
 };
 
-template<class T,class S> class Stream;
+template<class T,class H> class Stream;
 
 
 // decorated
 template<class T,class H>
 class Decorated;
-template<class T,class S, class H> 
-class Stream<Decorated<T,H>,S> : public Stream<T,S> {};
+template<class T,class H1, class H2> 
+class Stream<Decorated<T,H1>,H2> : public Stream<T,H2> {};
 // #define DEBUG
 
 // play a sound by operator<< and stops the sound by operator>>
 template <class H>
 class Stream<Sound,H> {
-protected:
   static H handle;
 public:
-  Stream<Sound,H>& operator<<(Sound n) { 
-    #ifdef DEBUG
-      Display::info("begin pitch:", n.pitch, "handle:", TYPENAME(handle));
-    #endif
+  Stream<Sound,H>& operator<<(Sound n) {
     handle << n; return *this; 
   }
-  Stream<Sound,H>& operator>>(Sound n) { 
-    #ifdef DEBUG
-      Display::info("end pitch:", n.pitch, "handle:", TYPENAME(handle));
-    #endif
+  Stream<Sound,H>& operator>>(Sound n) {
     handle >> n; return *this; 
   }
 };
@@ -49,9 +42,9 @@ template<class H> H Stream<Sound,H>::handle;
 
 // add note by operator<< and play the note at once
 // the note playing will end itself at certain time
-template <class S>
-class Stream<Note,S> : public Loop {
-  static Stream<Sound, S> soundStream;
+template <class H>
+class Stream<Note,H> : public Loop {
+  static Stream<Sound, H> soundStream;
   std::map<std::chrono::steady_clock::time_point, Sound> notes;
   std::mutex mtx;
   void update() {
@@ -67,9 +60,9 @@ class Stream<Note,S> : public Loop {
       notes.erase(time);
   }
 public:
-  Stream<Note,S>() : Loop{std::bind(&Stream<Note,S>::update, this)} { }
-  ~Stream<Note,S>() { kill(); }
-  Stream<Note,S>& operator<<(const Note& note) {
+  Stream<Note,H>() : Loop{std::bind(&Stream<Note,H>::update, this)} { }
+  ~Stream<Note,H>() { kill(); }
+  Stream<Note,H>& operator<<(const Note& note) {
     soundStream << note.sound;
     std::lock_guard<std::mutex> lock(mtx);
     notes.insert({
@@ -78,18 +71,18 @@ public:
     });
     return *this;
   }
-  Stream<Note,S>& operator>>(const Note&) { return *this; }
+  Stream<Note,H>& operator>>(const Note&) { return *this; }
 };
-template<class S> Stream<Sound,S> Stream<Note,S>::soundStream;
+template<class H> Stream<Sound,H> Stream<Note,H>::soundStream;
 
 
 #include <list>
 #include "Track.hpp"
 
 // add track by operator<< and start the track at once
-template <class S>
-class Stream<Track,S> : Loop {
-  static Stream<Sound,S> soundStream;
+template <class H>
+class Stream<Track,H> : Loop {
+  static Stream<Sound,H> soundStream;
   struct TrackInfo : public Track {
     std::chrono::steady_clock::time_point time;
     std::list<Note>::iterator current;
@@ -118,16 +111,16 @@ class Stream<Track,S> : Loop {
     }
   }
 public:
-  Stream<Track,S>() : Loop{std::bind(&Stream<Track,S>::update, this)} {}
-  ~Stream<Track,S>() { kill(); }
-  Stream<Track,S>& operator<<(const Track& t) {
+  Stream<Track,H>() : Loop{std::bind(&Stream<Track,H>::update, this)} {}
+  ~Stream<Track,H>() { kill(); }
+  Stream<Track,H>& operator<<(const Track& t) {
     std::lock_guard<std::mutex> lock(mtx);
     tracks.emplace_back(t);
     return *this;
   }
-  Stream<Track,S>& operator>>(const Track& n) { return *this; }
+  Stream<Track,H>& operator>>(const Track&) { return *this; }
 };
-template<class S> Stream<Sound,S> Stream<Track,S>::soundStream;
+template<class H> Stream<Sound,H> Stream<Track,H>::soundStream;
 
 
 #endif // __STREAMS_HPP

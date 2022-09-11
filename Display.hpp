@@ -100,7 +100,7 @@ class DISPLAY : Loop {
   void update() {
     if(!displaying.empty()) {
       std::lock_guard<std::mutex> lk(mtx);
-      for (const auto [c, p] : displaying)
+      for (const auto& [c, p] : displaying)
         if (is_alive())
           emplace_block(c, p);
         else
@@ -129,14 +129,14 @@ public:
     handle.clear();
   }
   DISPLAY() : Loop{std::bind(&DISPLAY::update, this), delay} {}
-  DISPLAY& operator<<(Sound n) {
+  DISPLAY& operator<<(Sound s) {
     std::lock_guard<std::mutex> lk(mtx);
-    if(n.pitch) displaying.insert({n.channel, n.pitch});
+    if(s.pitch) displaying.insert({s.channel, s.pitch});
     return *this;
   }
-  DISPLAY& operator>>(Sound n) {
+  DISPLAY& operator>>(Sound s) {
     std::lock_guard<std::mutex> lk(mtx);
-    if(n.pitch) displaying.erase({n.channel, n.pitch});
+    if(s.pitch) displaying.erase({s.channel, s.pitch});
     return *this;
   }
 };

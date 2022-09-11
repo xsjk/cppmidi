@@ -10,10 +10,10 @@ template <class T, class H> struct is_Decorated<Decorated<T, H>> : std::true_typ
 template <class T> inline constexpr bool is_Decorated_v = is_Decorated<T>::value;
 
 // a decotator to start the Note while constructing the object and stop it when the object is destroyed.
-template <class T, class S>
+template <class T, class H>
 class Decorated : public T {
   mutable bool flag = false; // flag to indicate whether this object hold the lifecycle of the Note.
-  static S stream;
+  static H stream;
 public:
   Decorated(const Decorated& other) = delete;
   // template <class... A>
@@ -28,7 +28,7 @@ public:
   ~Decorated() { 
     if (flag) stream >> *this;
   }
-  Decorated(Decorated&& other) noexcept : flag{ true }, T{ std::move(other) } {
+  Decorated(Decorated&& other) noexcept : T{ std::move(other) }, flag{ true } {
     other.flag = false; 
   }
 
@@ -37,7 +37,7 @@ public:
     flag = true; 
   }
 };
-template <class T, class S> S Decorated<T, S>::stream;
+template <class T, class H> H Decorated<T, H>::stream;
 
 
 #include "Streams.hpp"
