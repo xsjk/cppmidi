@@ -100,7 +100,7 @@ class DISPLAY : Loop {
   void update() {
     if(!displaying.empty()) {
       std::lock_guard<std::mutex> lk(mtx);
-      for (const auto [c, p] : displaying)
+      for (auto [c, p] : displaying)
         if (is_alive())
           emplace_block(c, p);
         else
