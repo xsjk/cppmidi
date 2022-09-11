@@ -65,10 +65,7 @@ int main() {
   }, t25{
     Note(240),
     Note(120,"bB5","p",2),
-
   },
-
-
     t31{
     Note(960,"G2","p",3),
   };
@@ -77,13 +74,9 @@ int main() {
 
 
 
-  // TRACK t1 = (t11*4+t12*4+t11*4)+(t13+t14*2+t15);
-  // TRACK t2 = (t21*2+t22*2+t23*2)+(t24);
+  TRACK t1 = (t11*4+t12*4+t11*4)+(t13+t14*2+t15);
+  TRACK t2 = (t21*2+t22*2+t23*2)+(t24);
 
-  // TRACK t1 = (t11*4);
-  // TRACK t2 = (t31);
-
-  // Sounds<2> s2 {{"A4","C4"}};
 
 
   KEYBOARD::wait_key(VK_ESCAPE);
