@@ -8,7 +8,7 @@ foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_SOURCE_DIR}/bin)
 endforeach(OUTPUTCONFIG)
 
-# add_subdirectory(modules)
+add_subdirectory(modules)
 
 if(MSVC)
     add_compile_definitions(NOMINMAX)
@@ -17,7 +17,7 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 add_library(cpp_midi INTERFACE)
 target_include_directories(cpp_midi INTERFACE include)
-target_link_libraries(cpp_midi INTERFACE winmm)
+target_link_libraries(cpp_midi INTERFACE rtmidi)
 
 add_executable(Canon src/Canon.cpp)
 add_executable(Greatest_Work_of_Art src/Greatest_Work_of_Art.cpp)

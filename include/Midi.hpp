@@ -1,61 +1,53 @@
 #ifndef __MIDI_HPP
 #define __MIDI_HPP
-// #pragma comment(lib,"winmm.lib")
+
 #include <Windows.h>
 #include <stdexcept>
+#include <RtMidi.h>
+#include <memory>
 
 class Midi {
   union MIDIMSG {
     BYTE bytes[3];
     UINT data;
   };
-  static HMIDIOUT handle;
+  static std::unique_ptr<RtMidiOut> handle;
 public:
   Midi() {
     if (!handle)
-      if(midiOutOpen(&handle, 0, 0, 0, CALLBACK_NULL))
-        throw std::runtime_error("Could not open MIDI_handle output");
+      try {
+        handle = std::make_unique<RtMidiOut>(RtMidi::UNSPECIFIED);
+        handle->openPort(0);
+      }
+      catch (RtMidiError &error) {
+        error.printMessage();
+        exit(EXIT_FAILURE);
+      }
   }
-  ~Midi() {
-    if (handle) midiOutClose(handle);
+  template <typename ...T>
+  static void output(T&& ...arg) {
+    uint8_t bytes[] = { BYTE(std::forward<T>(arg))... };
+    handle->sendMessage(bytes, sizeof(bytes));
   }
-  template <typename ...T> 
-  static MMRESULT output(T&& ...arg) {
-    return midiOutShortMsg(handle,MIDIMSG{ BYTE(arg)... }.data);
-  }
-  template <typename ...T> 
-  MMRESULT operator()(T&& ...arg) {
+  template <typename ...T>
+  void operator()(T&& ...arg) {
     return output(std::forward<T>(arg)...);
   }
 };
-HMIDIOUT Midi::handle = nullptr;
+std::unique_ptr<RtMidiOut> Midi::handle = nullptr;
 
 
 #include "Sound.hpp"
 
 class MIDI : Midi {
 public:
-  static MMRESULT begin_note(Channel c, Pitch p, Volume v){
-    return output(0x90|c,p,v);
-  }
-  static MMRESULT end_note(Channel c, Pitch p){
-    return output(0x80|c,p);
-  }
-  static MMRESULT set_instrument(Channel c, Instrument i){
-    return output(0xC0|c,i);
-  }
-  static MMRESULT set_volume(Channel c, Volume v){
-    return output(0xB0|c,0x07,v);
-  }
-  static MMRESULT mute(Channel c) {
-    return output(0xB0|c,0x7B);
-  }
-  MIDI& operator<<(Sound s) { 
-    return begin_note(s.channel, s.pitch, s.volume), *this;
-  }
-  MIDI& operator>> (Sound s) { 
-    return end_note(s.channel, s.pitch), *this;
-  }
+  static void begin_note(Channel c, Pitch p, Volume v) { output(0x90 | c, p, v); }
+  static void end_note(Channel c, Pitch p) { output(0x80 | c, p); }
+  static void set_instrument(Channel c, Instrument i) { output(0xC0 | c, i); }
+  static void set_volume(Channel c, Volume v) { output(0xB0 | c, 0x07, v); }
+  static void mute(Channel c) { output(0xB0 | c, 0x7B); }
+  MIDI &operator<<(Sound s) { begin_note(s.channel, s.pitch, s.volume); return *this; }
+  MIDI &operator>>(Sound s) { end_note(s.channel, s.pitch); return *this; }
 };
 
 #endif // __MIDI_HPP
